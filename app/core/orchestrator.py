@@ -24,6 +24,7 @@ from app.agents import (
     TriageAgent,
     VerificationAgent,
 )
+from app.agents.context import find_instruction_like
 from app.core.config import Settings
 from app.core.enums import (
     CHANGE_OUTCOMES,
@@ -349,6 +350,16 @@ class Orchestrator:
                 permit=outcome.permit_basis,
                 replayed=bool((outcome.output or {}).get("replayed")),
             )
+            suspicious = find_instruction_like(outcome.output)
+            if suspicious:
+                workflow.record(
+                    EventType.UNTRUSTED_CONTENT_FLAGGED,
+                    self.component,
+                    task=task.key,
+                    tool=task.tool_name,
+                    samples=suspicious,
+                    note="Tool output contains instruction-like text; it is treated as data only",
+                )
         else:
             if outcome.error_code == "execution_not_authorized":
                 workflow.record(

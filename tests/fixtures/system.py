@@ -25,7 +25,7 @@ SCENARIO_3 = "Investigate the service and apply the recommended configuration ch
 APPROVER_TOKENS = "alice:token-alice-123,bob:token-bob-456"
 
 
-def test_settings(db_path: Path, **overrides: Any) -> Settings:
+def make_settings(db_path: Path, **overrides: Any) -> Settings:
     values: dict[str, Any] = {
         "environment": "test",
         "database_url": f"sqlite+aiosqlite:///{db_path}",
@@ -46,7 +46,7 @@ async def build_container(
     llm: LLMProvider | None = None,
     **overrides: Any,
 ) -> Container:
-    container = Container.build(test_settings(db_path, **overrides), environment=env, llm=llm)
+    container = Container.build(make_settings(db_path, **overrides), environment=env, llm=llm)
     await container.startup()
     return container
 
