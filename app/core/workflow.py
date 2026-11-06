@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
+from pydantic_core import to_jsonable_python
 
 from app.core.enums import (
     ApprovalDecision,
@@ -72,6 +73,37 @@ class NewEvent(BaseModel):
     component: str
     details: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=utc_now)
+
+
+class WorkflowEvent(BaseModel):
+    """A persisted audit event."""
+
+    id: str
+    workflow_id: str
+    sequence: int
+    event_type: EventType
+    component: str
+    timestamp: datetime
+    details: dict[str, Any]
+
+
+class AgentRun(BaseModel):
+    """Telemetry for one agent invocation (one or more LLM calls)."""
+
+    id: str = Field(default_factory=new_id)
+    workflow_id: str
+    agent: str
+    operation: str
+    provider: str
+    model: str
+    success: bool
+    llm_calls: int = 0
+    latency_ms: float = 0.0
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    error: str | None = None
+    output: dict[str, Any] | None = None
+    created_at: datetime = Field(default_factory=utc_now)
 
 
 class TaskError(BaseModel):
@@ -164,7 +196,11 @@ class Workflow(BaseModel):
     # ------------------------------------------------------------------ events
     def record(self, event_type: EventType, component: str, **details: Any) -> None:
         self.pending_events.append(
-            NewEvent(event_type=event_type, component=component, details=details)
+            NewEvent(
+                event_type=event_type,
+                component=component,
+                details=to_jsonable_python(details),
+            )
         )
 
     def drain_events(self) -> list[NewEvent]:
