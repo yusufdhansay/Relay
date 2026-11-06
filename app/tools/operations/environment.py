@@ -8,6 +8,7 @@ outputs. Tests and evaluations can inject faults and tool failures.
 from __future__ import annotations
 
 import asyncio
+import copy
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
@@ -181,7 +182,13 @@ _HEALTHY_LOGS: tuple[tuple[int, str, str], ...] = (
 
 class SimulatedEnvironment:
     def __init__(self, services: list[ServiceState] | None = None) -> None:
-        self.services = {s.name: s for s in (services or default_services())}
+        self._initial = copy.deepcopy(services) if services else None
+        self.reset()
+
+    def reset(self) -> None:
+        """Restore the initial services and clear all recorded state."""
+        initial = copy.deepcopy(self._initial) if self._initial else default_services()
+        self.services = {s.name: s for s in initial}
         self.reports: dict[str, dict[str, Any]] = {}
         self.mutations: list[dict[str, Any]] = []
         self._idempotent_results: dict[str, dict[str, Any]] = {}
