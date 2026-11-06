@@ -6,6 +6,8 @@ from pathlib import Path
 import pytest
 
 from app.database import Database
+from app.services.container import Container
+from tests.fixtures.system import build_container
 
 
 @pytest.fixture
@@ -14,3 +16,10 @@ async def database(tmp_path: Path) -> AsyncIterator[Database]:
     await db.create_schema()
     yield db
     await db.dispose()
+
+
+@pytest.fixture
+async def container(tmp_path: Path) -> AsyncIterator[Container]:
+    c = await build_container(tmp_path / "relay.db")
+    yield c
+    await c.shutdown()

@@ -116,5 +116,6 @@ class PolicyEngine:
 
 
 def _raise(risk: RiskLevel) -> RiskLevel:
-    order = [RiskLevel.LOW, RiskLevel.MEDIUM, RiskLevel.HIGH, RiskLevel.CRITICAL]
+    """Raise one level, capped at HIGH. CRITICAL is reserved for always-blocked tools."""
+    order = [RiskLevel.LOW, RiskLevel.MEDIUM, RiskLevel.HIGH]
     return order[min(order.index(risk) + 1, len(order) - 1)]

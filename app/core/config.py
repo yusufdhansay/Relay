@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     retry_base_delay_seconds: float = Field(default=0.2, ge=0)
     retry_max_delay_seconds: float = Field(default=2.0, ge=0)
 
+    # Policy: changes to these services are raised one risk level.
+    critical_services: str = "payment-service,auth-service"
+
     # Recovery
     recover_on_startup: bool = False
 
@@ -66,6 +69,9 @@ class Settings(BaseSettings):
     @classmethod
     def _upper_log_level(cls, value: str) -> str:
         return value.upper()
+
+    def critical_service_names(self) -> list[str]:
+        return [s.strip() for s in self.critical_services.split(",") if s.strip()]
 
     def approvers(self) -> dict[str, str]:
         """Return a mapping of approver token to approver name."""

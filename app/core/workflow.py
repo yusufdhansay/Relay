@@ -330,6 +330,17 @@ class Workflow(BaseModel):
                 )
                 self.skip_dependents(task.key, reason=f"dependency {task.key} was skipped")
 
+    def skip_task(self, task: Task, *, reason: str) -> None:
+        self._set_task_status(task, TaskStatus.SKIPPED)
+        task.error = TaskError(code="dependency_not_met", message=reason)
+        self.record(EventType.TASK_SKIPPED, "orchestrator", task_key=task.key, reason=reason)
+        self.skip_dependents(task.key, reason=f"dependency {task.key} was skipped")
+
+    def requeue_interrupted_task(self, task: Task) -> None:
+        """Crash recovery: put a RUNNING task back to PENDING (same idempotency key)."""
+        self._set_task_status(task, TaskStatus.PENDING)
+        task.started_at = None
+
     def reset_task_for_retry(self, task: Task, *, reason: str) -> None:
         self._set_task_status(task, TaskStatus.PENDING)
         task.error = None
