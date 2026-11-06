@@ -93,7 +93,38 @@ class RequestCategory(StrEnum):
     CONFIGURATION_CHANGE = "CONFIGURATION_CHANGE"
     HEALTH_CHECK = "HEALTH_CHECK"
     REPORTING = "REPORTING"
+    MAINTENANCE = "MAINTENANCE"
     UNSUPPORTED = "UNSUPPORTED"
+
+
+class Symptom(StrEnum):
+    HIGH_LATENCY = "HIGH_LATENCY"
+    ELEVATED_ERRORS = "ELEVATED_ERRORS"
+    AVAILABILITY = "AVAILABILITY"
+    RESOURCE_PRESSURE = "RESOURCE_PRESSURE"
+
+
+class Outcome(StrEnum):
+    """What the requester wants Relay to achieve."""
+
+    INVESTIGATE = "INVESTIGATE"
+    HEALTH_CHECK = "HEALTH_CHECK"
+    REPORT = "REPORT"
+    REMEDIATE = "REMEDIATE"
+    RESTART = "RESTART"
+    CHANGE_CONFIGURATION = "CHANGE_CONFIGURATION"
+    DELETE_DATA = "DELETE_DATA"
+
+
+CHANGE_OUTCOMES = frozenset(
+    {Outcome.REMEDIATE, Outcome.RESTART, Outcome.CHANGE_CONFIGURATION, Outcome.DELETE_DATA}
+)
+
+
+class VerificationRecommendation(StrEnum):
+    COMPLETE = "COMPLETE"
+    RETRY = "RETRY"
+    ESCALATE = "ESCALATE"
 
 
 class Urgency(StrEnum):
