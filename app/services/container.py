@@ -21,6 +21,7 @@ from app.core.policy import PolicyEngine
 from app.database import Database
 from app.llm.base import LLMProvider
 from app.llm.factory import build_provider
+from app.services.approvals import ApprovalService
 from app.services.workflows import WorkflowService
 from app.tools.operations import SimulatedEnvironment, build_operations_registry
 from app.tools.registry import ToolRegistry
@@ -52,6 +53,7 @@ class Container:
     locks: WorkflowLocks
     orchestrator: Orchestrator
     workflows: WorkflowService
+    approvals: ApprovalService
 
     @classmethod
     def build(
@@ -112,6 +114,9 @@ class Container:
             locks=locks,
             orchestrator=orchestrator,
             workflows=workflows,
+            approvals=ApprovalService(
+                settings=settings, database=database, orchestrator=orchestrator, locks=locks
+            ),
         )
 
     async def startup(self) -> None:
